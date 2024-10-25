@@ -2,11 +2,13 @@
 #define STRUCT_H
 
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <SDL_image.h>
 
 // Global variables
-extern int screenWidth;   // Declare as extern
-extern int screenHeight;  // Declare as extern
+extern int screenWidth;
+extern int screenHeight;
+extern int GameState;
 
 // Button structure
 typedef struct {
@@ -14,18 +16,19 @@ typedef struct {
     SDL_Rect position;
     int width;
     int height;
+    const char *text;
     void (*onClick)();
 } Button;
 
 // Structure for different screens
 typedef enum {
     SCREEN_MENU,
+    SCREEN_GAME_SETTINGS,
     SCREEN_GAME,
-    SCREEN_SETTINGS,
-    SCREEN_EXIT
+    SCREEN_SETTINGS
 } ScreenType;
 
-extern ScreenType currentScreen;  // Declare as extern
+extern ScreenType currentScreen;
 
 // Structure for screen parameters
 typedef struct Screen {
@@ -33,6 +36,6 @@ typedef struct Screen {
     int buttonCount;
 } Screen;
 
-extern Screen screens[4];  // Declare as extern
+extern Screen screens[4];
 
 #endif

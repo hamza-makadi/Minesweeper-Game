@@ -25,23 +25,42 @@ SDL_Surface* loadAndResizeImage(const char *file, int width, int height) {
 }
 
 // Function to create a button
-Button createButton(const char *imageFile, int x, int y, int width, int height) {
+Button createButton(const char *imageFile, const char *text, float xPercent, float yPercent, int width, int height) {
     Button button;
     button.image = loadAndResizeImage(imageFile, width, height);
-    button.position.x = x;
-    button.position.y = y;
+    button.text = text;
     button.width = width;
     button.height = height;
+    button.position.x = (int)((screenWidth - button.width) * xPercent);
+    button.position.y = (int)((screenHeight - button.height) * yPercent);
     button.onClick = NULL;
     return button;
 }
 
 // Function to render a button
-void renderButton(Button *button, SDL_Surface *screen) {
+void renderButton(SDL_Surface *screen, Button *button, TTF_Font *font){
     if (button->image) {
         SDL_BlitSurface(button->image, NULL, screen, &button->position);
+        SDL_Color textColor = {150, 150, 150};
+        SDL_Surface *textSurface = TTF_RenderText_Solid(font, button->text, textColor);
+
+        if (!textSurface) {
+            printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
+            return;
+        }
+
+        // Center the text on the button
+        SDL_Rect textPosition;
+        textPosition.x = button->position.x + (button->width - textSurface->w) / 2;
+        textPosition.y = button->position.y + (button->height - textSurface->h) / 2;
+
+        SDL_BlitSurface(textSurface, NULL, screen, &textPosition);
+
+        // Free the text surface
+        SDL_FreeSurface(textSurface);
     } else {
         printf("Button image not loaded.\n");
+        GameState=0;
     }
 }
 
