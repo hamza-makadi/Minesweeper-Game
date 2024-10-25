@@ -1,63 +1,62 @@
+#include <stdio.h>
 #include <SDL.h>
-#include <SDL_gfxPrimitives.h>
-#include <math.h>
+#include <SDL_ttf.h>
+#include <SDL_image.h>
+#include "include/struct.h"
 
-int main(int argc, char *argv[]) {
-    SDL_Event ev;
-    SDL_Surface *screen;
-    int x, y, r;
+// Global variables definition
+int screenWidth = 800;
+int screenHeight = 600;
+ScreenType currentScreen = SCREEN_MENU;
+Screen screens[4];
 
-    /* SDL inicializálása és ablak megnyitása */
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
-    screen = SDL_SetVideoMode(440, 360, 0, SDL_ANYFORMAT);
+int main(int argc, char* argv[]) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    /************************************
+    I was trying to debug my code using the printf function but nothing was showing up on the screen
+    so i did a quick search and i found the solution on this form
+    https://forums.codeblocks.org/index.php?topic=4887.0
+    *************************************/
+    freopen("CON", "w", stdout); // redirects stdout
+    freopen("CON", "w", stderr); // redirects stderr
+    /************************************/
+
+    SDL_Surface *screen = SDL_SetVideoMode(screenWidth, screenHeight, 32, SDL_SWSURFACE | SDL_RESIZABLE);
     if (!screen) {
-        fprintf(stderr, "Nem sikerult megnyitni az ablakot!\n");
-        exit(1);
-    }
-    SDL_WM_SetCaption("SDL peldaprogram", "SDL peldaprogram");
-
-    r = 50;
-
-    /* karika */
-    x = 100;
-    y = 100;
-    circleRGBA(screen, x, y, r, 255, 0, 0, 255);
-    circleRGBA(screen, x + r, y, r, 0, 255, 0, 255);
-    circleRGBA(screen, x + r * cos(3.1415 / 3), y - r * sin(3.1415 / 3), r, 0, 0, 255, 255);
-
-    /* antialias karika */
-    x = 280;
-    y = 100;
-    aacircleRGBA(screen, x, y, r, 255, 0, 0, 255);
-    aacircleRGBA(screen, x + r, y, r, 0, 255, 0, 255);
-    aacircleRGBA(screen, x + r * cos(3.1415 / 3), y - r * sin(3.1415 / 3), r, 0, 0, 255, 255);
-
-    /* kitoltott kor */
-    x = 100;
-    y = 280;
-    filledCircleRGBA(screen, x, y, r, 255, 0, 0, 255);
-    filledCircleRGBA(screen, x + r, y, r, 0, 255, 0, 255);
-    filledCircleRGBA(screen, x + r * cos(3.1415 / 3), y - r * sin(3.1415 / 3), r, 0, 0, 255, 255);
-
-    /* attetszo kor */
-    x = 280;
-    y = 280;
-    filledCircleRGBA(screen, x, y, r, 255, 0, 0, 96);
-    filledCircleRGBA(screen, x + r, y, r, 0, 255, 0, 96);
-    filledCircleRGBA(screen, x + r * cos(3.1415 / 3), y - r * sin(3.1415 / 3), r, 0, 0, 255, 96);
-
-    /* szoveg */
-    stringRGBA(screen, 110, 350, "Kilepeshez: piros x az ablakon", 255, 255, 255, 255);
-
-    /* eddig elvegzett rajzolasok a kepernyore */
-    SDL_Flip(screen);
-
-    /* varunk a kilepesre */
-    while (SDL_WaitEvent(&ev) && ev.type != SDL_QUIT) {
+        fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
     }
 
-    /* ablak bezarasa */
+    SDL_WM_SetCaption("Minesweeper-1.0", NULL);
+    int running = 1;
+    SDL_Event event;
+
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = 0;
+            }else if (event.type == SDL_VIDEORESIZE) {
+                // Handle window resizing
+                screenWidth = event.resize.w;
+                screenHeight = event.resize.h;
+                screen = SDL_SetVideoMode(screenWidth, screenHeight, 32, SDL_SWSURFACE | SDL_RESIZABLE);
+                if (!screen) {
+                    fprintf(stderr, "Unable to resize window: %s\n", SDL_GetError());
+                }
+            }
+        }
+
+        // Clear screen with a color (e.g., black)
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+        SDL_Flip(screen);  // Update the screen
+    }
+
     SDL_Quit();
-
     return 0;
 }
+
